@@ -23,7 +23,6 @@ win.nodelay(1)
  
 key = KEY_RIGHT # Initializing values
 score = 0
-
 init_x = randint(5, H - 5)                                      
 init_y = randint(5, W - 5)
 food_x = randint(3, H - 3)
@@ -68,44 +67,36 @@ while key != 27: # While Esc key is not pressed
     if snake[0][0] == H - 1: snake[0][0] = 1
     if snake[0][1] == W - 1: snake[0][1] = 1
     
-    # Exit if snake crosses the boundaries
-    # if snake[0][0] == 1 or snake[0][0] == H - 1 or snake[0][1] == 1 or snake[0][1] == W - 1: break
-
     # If snake runs over itself
+    # This line of code contains a lot of problems I think
     if snake[0] in snake[1:]: break
     
-    if snake[0] == food:                                            # When snake eats the food
+    if snake[0] == food: # When snake eats the food
         food = []
         score += 1
         while food == []:
-            food = [randint(1, H - 2), randint(1, W - 2)]                 # Calculating next food's coordinates
+            food = [randint(1, H - 2), randint(1, W - 2)] # Calculating next food's coordinates
             if food in snake: food = []
         win.addch(food[0], food[1], '#')
     else:    
-        last = snake.pop()                                          # [1] If it does not eat the food, length decreases
+        last = snake.pop() # [1] If it does not eat the food, length decreases
         win.addch(last[0], last[1], ' ')
     win.addch(snake[0][0], snake[0][1], '*')
 
-    
 
-    fx = food[0]
-    fy = food[1]
-    if snake[0][0] == 1:
-        key = KEY_RIGHT
-    if snake[0][0] == H - 2:
+    # The following four if/else statement is used to determine where is
+    # the food and where the snake should go.
+    # There is several bad thing about these lines of code:
+    #   If the next food is on the same line with the snake, break
+    #   The snake do not have its own selfawareness
+    #   Other problems are still waiting for determination 
+    if snake[0][0] == food[0] and snake[0][1] > food[1]:
         key = KEY_LEFT
-    if snake[0][1] == 1:
-        key = KEY_DOWN
-    if snake[0][1] == W - 2:
-        key = KEY_UP
-
-    if snake[0][0] == fx and snake[0][1] > fy:
-        key = KEY_LEFT
-    elif snake[0][0] == fx and snake[0][1] < fy:
+    elif snake[0][0] == food[0] and snake[0][1] < food[1]:
         key = KEY_RIGHT
-    elif snake[0][1] == fy and snake[0][0] > fx:
+    elif snake[0][1] == food[1] and snake[0][0] > food[0]:
         key = KEY_UP
-    elif snake[0][1] == fy and snake[0][0] < fx:
+    elif snake[0][1] == food[1] and snake[0][0] < food[0]:
         key = KEY_DOWN
         
 curses.endwin()
