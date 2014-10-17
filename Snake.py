@@ -9,8 +9,8 @@ from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN
 from random import randint
  
 H = 20 # Final Constant Height                                                        
-W = 40 # Final Constant Width                                                        
-GAMESPEED = 50 # The initial GameSpeed
+W = 80 # Final Constant Width                                                        
+GAMESPEED = 5 # The initial GameSpeed
 
 # Initialize Interface
 curses.initscr()
@@ -34,16 +34,31 @@ snake = [[init_x, init_y],
 food = [food_x, food_y] # First food co-ordinates                                          
 
 win.addch(food[0], food[1], '#') # Prints the food
+file1 = open("coordinates.txt", "wb")
+count = 0
  
 while key != 27: # While Esc key is not pressed                                                  
     win.border(0)
     win.addstr(0, 2, ' Score : ' + str(score) + ' ')    # Printing 'Score' and                
     win.addstr(0, W / 2 - 2, ' SNAKE ')                 # 'SNAKE' strings                                 
-    win.timeout(GAMESPEED - (len(snake)/5 + len(snake)/10)%120) # Increases the speed of Snake as its length increases
+    win.timeout(GAMESPEED) # Set Speed of the game to be constant
     
+
+
     prevKey = key # Previous key pressed
     event = win.getch()
     key = key if event == -1 else event 
+    
+    # Prevent the situation if the food the directlly behind the snake,
+    # it might kill itself
+    if snake[0][0] - 1 == snake[1][0] and key == KEY_UP:
+        key = KEY_DOWN
+    elif snake[0][0] + 1 == snake[1][0] and key == KEY_DOWN:
+        key = KEY_UP
+    elif snake[0][1] - 1 == snake[1][1] and key == KEY_LEFT:
+        key = KEY_RIGHT
+    elif snake[0][1] + 1 == snake[1][1] and key == KEY_RIGHT:
+        key = KEY_LEFT
  
  
     if key == ord(' '): # If SPACE BAR is pressed, wait for another
@@ -66,10 +81,8 @@ while key != 27: # While Esc key is not pressed
     if snake[0][1] == 0: snake[0][1] = W - 2
     if snake[0][0] == H - 1: snake[0][0] = 1
     if snake[0][1] == W - 1: snake[0][1] = 1
-    
-    # If snake runs over itself
-    # This line of code contains a lot of problems I think
-    if snake[0] in snake[1:]: break
+
+
     
     if snake[0] == food: # When snake eats the food
         food = []
@@ -99,6 +112,30 @@ while key != 27: # While Esc key is not pressed
     elif snake[0][1] == food[1] and snake[0][0] < food[0]:
         key = KEY_DOWN
         
+#    all_x_cor = [];
+#    all_y_cor = [];
+#    for i in range(1, len(snake) - 1):
+#        all_x_cor.append(snake[i][0])
+#        all_y_cor.append(snake[i][1])
+
+#    if snake[0][0] + 1 in all_x_cor:
+#       key = KEY_LEFT
+#    elif snake[0][0] - 1 in all_x_cor:
+#       key = KEY_RIGHT
+#    elif snake[0][1] + 1 in all_y_cor:
+#       key = KEY_UP
+#    elif snake[0][1] - 1 in all_y_cor:
+#       key = KEY_DOWN
+    
+    count += 1 # Keeping tracking of the coordinates of the Game
+    file1.write('\ncoordinates ' + str(count) + str(snake[:]) + '\n')
+
+    # If snake runs over itself
+    # This line of code contains a lot of problems I think
+    if snake[0] in snake[1:]: 
+        break
+
 curses.endwin()
 
 print("\nScore - " + str(score))
+file1.close()
